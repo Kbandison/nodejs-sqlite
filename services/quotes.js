@@ -1,15 +1,18 @@
-const db = require('../services/db');
-const config = require('../config');
+const db = require("../services/db");
+const config = require("../config");
 
 function getMultiple(page = 1) {
   const offset = (page - 1) * config.listPerPage;
-  const data = db.query(`SELECT * FROM quote LIMIT ?,?`, [offset, config.listPerPage]);
-  const meta = {page};
+  const data = db.query(
+    `SELECT * FROM quote WHERE author LIKE 'j%' LIMIT ?,?`,
+    [offset, config.listPerPage]
+  );
+  const meta = { page };
 
   return {
     data,
-    meta
-  }
+    meta,
+  };
 }
 
 function validateCreate(quote) {
@@ -18,17 +21,17 @@ function validateCreate(quote) {
   console.log(quote);
 
   if (!quote) {
-    messages.push('No object is provided');
+    messages.push("No object is provided");
   }
 
   if (!quote.quote) {
-    messages.push('Quote is empty');
+    messages.push("Quote is empty");
   }
 
   if (!quote.author) {
-    messages.push('Author is empty');
+    messages.push("Author is empty");
   }
-  
+
   if (messages.length) {
     let error = new Error(messages.join());
     error.statusCode = 400;
@@ -39,18 +42,21 @@ function validateCreate(quote) {
 
 function create(quoteObj) {
   validateCreate(quoteObj);
-  const {quote, author} = quoteObj;
-  const result = db.run('INSERT INTO quote (quote, author) VALUES (@quote, @author)', {quote, author});
-  
-  let message = 'Error in creating quote';
+  const { quote, author } = quoteObj;
+  const result = db.run(
+    "INSERT INTO quote (quote, author) VALUES (@quote, @author)",
+    { quote, author }
+  );
+
+  let message = "Error in creating quote";
   if (result.changes) {
-    message = 'Quote created successfully';
+    message = "Quote created successfully";
   }
 
-  return {message};
+  return { message };
 }
 
 module.exports = {
   getMultiple,
-  create
-}
+  create,
+};
